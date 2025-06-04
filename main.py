@@ -46,7 +46,7 @@ rooms = [
     "BF2.14", "BF2.15", "BF2.16", "BF2.17",
 
     # Arch Rooms
-    "AF2.16", "AF2.8", "AF3.7", "AF3.8", "AF3.10"
+    # "AF2.16", "AF2.8", "AF3.7", "AF3.8", "AF3.10"
 ]
 
 archRooms = ["AF2.16", "AF2.8", "AF3.7", "AF3.8", "AF3.10"]
@@ -59,7 +59,7 @@ def hasOverlap(course1, course2):
 
 model = pulp.LpProblem("CourseScheduling", pulp.LpMinimize)
 
-# Decision variables
+# Decision variable
 x = pulp.LpVariable.dicts("Assignment", (courses, rooms), cat='Binary')
 
 # Objective Function
@@ -68,30 +68,14 @@ x = pulp.LpVariable.dicts("Assignment", (courses, rooms), cat='Binary')
 
 # Every course must be assigned to at most 1 room
 for course in courses:
-    if course.__contains__("ARCH"):
-        model += pulp.lpSum(x[course][room] for room in archRooms) == 1
-    else:
-        model += pulp.lpSum(x[course][room] for room in rooms) == 1
+    model += pulp.lpSum(x[course][room] for room in rooms) == 1
 
 # Required seats for course must be <= roomCapacity
 for course in courses:
     requiredSeats = courseData[course]["Seats"]
-    if course.__contains__("ARCH"):
-        maxCapacity = max(roomData[room] for room in archRooms)
-        if requiredSeats > maxCapacity:
-            print(course)
-        for room in archRooms:
-            roomCapacity = roomData[room]
-            model += (x[course][room] * requiredSeats <= roomCapacity)
-    else:
-        for room in rooms:
-            if room in archRooms:
-                continue
-            maxCapacity = max(roomData[room] for room in rooms)
-            if requiredSeats > maxCapacity:
-                print(course)
-            roomCapacity = roomData[room]
-            model += (x[course][room] * requiredSeats <= roomCapacity)
+    for room in rooms:
+        roomCapacity = roomData[room]
+        model += (x[course][room] * requiredSeats <= roomCapacity)
 
 # Room cannot be assigned to the 2 courses that overlap
 n = len(courses)
