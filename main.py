@@ -8,6 +8,10 @@ def readList(source, destination):
         for line in file:
             destination.append(line.strip())
 
+# Return true if 2 courses overlap
+def hasOverlap(course1, course2):
+    return course1["Start"] <= course2["End"] and course2["Start"] <= course1["End"]
+
 courses = []
 rooms = []
 
@@ -15,10 +19,6 @@ readList("Data/CourseList.txt", courses)
 readList("Data/RoomList.txt", rooms)
 
 processCourses(courseData)
-
-# Return true if 2 courses overlap
-def hasOverlap(course1, course2):
-    return course1["Start"] <= course2["End"] and course2["Start"] <= course1["End"]
 
 model = pulp.LpProblem("RoomScheduling", pulp.LpMinimize)
 
