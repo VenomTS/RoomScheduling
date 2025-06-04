@@ -59,9 +59,8 @@ model.solve()
 # Print the model status
 print(f"Status: {pulp.LpStatus[model.status]}")
 
-assignedCoursesFile = open("assigned.txt", 'w')
-unassignedCoursesFile = open("missed.txt", 'w')
-testFile = open("testFile.txt", 'w')
+assignedCoursesFile = open("Data/RoomAssignments.txt", 'w')
+unassignedCoursesFile = open("Data/UnassignableCourses", 'w')
 
 # Save data in file so it can be read out
 for course in courses:
@@ -69,7 +68,6 @@ for course in courses:
     for room in rooms:
         if pulp.value(x[course][room]) == 1:
             assignedCoursesFile.write(f"Course {course} assigned to {room} - {courseData[course]["Seats"]}/{roomData[room]}\n")
-            testFile.write(f"{room} {courseData[course]["Day"]} {courseData[course]["Start"]} {courseData[course]["End"]}\n")
             isAssigned = True
     if not isAssigned:
         unassignedCoursesFile.write(f"Course {course} was not assigned to any room\n")
