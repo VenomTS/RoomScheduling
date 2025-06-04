@@ -20,15 +20,16 @@ processCourses(courseData)
 def hasOverlap(course1, course2):
     return course1["Start"] <= course2["End"] and course2["Start"] <= course1["End"]
 
-model = pulp.LpProblem("CourseScheduling", pulp.LpMinimize)
+model = pulp.LpProblem("RoomScheduling", pulp.LpMinimize)
 
 # Decision variable
 x = pulp.LpVariable.dicts("Assignment", (courses, rooms), cat='Binary')
 
 # Objective function
 # Goal is to minimize the amount of unused seats for each course
-# model += pulp.lpSum(x[course][room] * (roomData[room] - courseData[course]["Seats"]) for course in courses for room in rooms)
+model += pulp.lpSum(x[course][room] * (roomData[room] - courseData[course]["Seats"]) for course in courses for room in rooms)
 
+# Constraints
 # Every course must be assigned to at most 1 room
 for course in courses:
     model += pulp.lpSum(x[course][room] for room in rooms) == 1
@@ -56,7 +57,7 @@ for room in rooms:
 model.solve()
 
 # Print the model status
-print("Status:", pulp.LpStatus[model.status])
+print(f"Status: {pulp.LpStatus[model.status]}")
 
 assignedCoursesFile = open("assigned.txt", 'w')
 unassignedCoursesFile = open("missed.txt", 'w')
@@ -67,7 +68,7 @@ for course in courses:
     isAssigned = False
     for room in rooms:
         if pulp.value(x[course][room]) == 1:
-            assignedCoursesFile.write(f"Course {course} assigned to {room} - {courseData[course]["Day"]} {courseData[course]["Start"]} {courseData[course]["End"]} \n")
+            assignedCoursesFile.write(f"Course {course} assigned to {room} - {courseData[course]["Seats"]}/{roomData[room]}\n")
             testFile.write(f"{room} {courseData[course]["Day"]} {courseData[course]["Start"]} {courseData[course]["End"]}\n")
             isAssigned = True
     if not isAssigned:
